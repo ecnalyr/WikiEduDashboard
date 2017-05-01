@@ -1,35 +1,32 @@
 import McFly from 'mcfly';
 const Flux = new McFly();
 
-// Data
-let _openKey = null;
-
-
-// Private methods
-const setOpenKey = function (key) {
-  if (key === _openKey) {
-    _openKey = null;
-  } else {
-    _openKey = key;
+// reducer
+const initialState = { openKey: null };
+function UI(state = initialState, action) {
+  switch (action.actionType) {
+    case 'OPEN_KEY':
+      if (action.data.key === state.openKey) {
+        return { ...state, openKey: null };
+      }
+      return { ...state, openKey: action.data.key };
+    default:
+      return state;
   }
-};
+}
 
 // Store
+let uiState = { openKey: null };
+
 const storeMethods = {
   getOpenKey() {
-    return _openKey;
+    return uiState.openKey;
   }
 };
+
 const UIStore = Flux.createStore(storeMethods, (payload) => {
-  const { data } = payload;
-  switch (payload.actionType) {
-    case 'OPEN_KEY':
-      setOpenKey(data.key);
-      UIStore.emitChange();
-      break;
-    default:
-      // no default
-  }
+  uiState = UI(uiState, payload);
+  UIStore.emitChange();
   return true;
 });
 
